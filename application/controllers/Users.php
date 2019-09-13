@@ -73,12 +73,12 @@
 			$data = array('status' => false, 'messages' => array());
 			
 			$this->form_validation->set_rules('lecturername', 'Fullname', 'required');
-			$this->form_validation->set_rules('course', 'Course', 'callback_course_check|is_unique[lecturer.course_code]',
+			$this->form_validation->set_rules('course', 'Course', 'callback_course_check|is_unique[lecturers.course_code]',
 				array(
                 'is_unique'     => 'This %s has already been registered under a lecturer. Please refresh the page'
         	));
-			$this->form_validation->set_rules('password','Password','required|min_length[6]');
-			$this->form_validation->set_rules('confirmpassword','Confirm Password','required|min_length[6]|matches[password]');
+			$this->form_validation->set_rules('pword','Password','required|min_length[6]');
+			$this->form_validation->set_rules('confirmpassword','Confirm Password','required|min_length[6]|matches[pword]');
 			
 			$this->form_validation->set_error_delimiters('<p class="text-danger">', '</p>');
 			
@@ -95,6 +95,43 @@
 		}
 		echo json_encode($data);
 		}
+
+		public function changePwd()
+		{//To validate and register lecturers
+			
+			$data = array('status' => false, 'messages' => array());
+			
+			$this->form_validation->set_rules('oldpwd', 'Old Password', 'required|callback_checkPwd');
+			$this->form_validation->set_rules('newpwd','New Password','required|min_length[6]');
+			$this->form_validation->set_rules('confirmnewpwd','Confirm Password','required|min_length[6]|matches[newpwd]');
+			
+			$this->form_validation->set_error_delimiters('<p class="text-danger">', '</p>');
+			
+		if ($this->form_validation->run() === FALSE) {
+			foreach ($_POST as $key => $value) {
+					$data['messages'][$key] = form_error($key);
+				}
+		}else{
+			$data['status'] = true;
+			
+			$this->users_model->changePwd();
+		}
+		echo json_encode($data);
+		}
+
+		public function checkPwd($str)
+        {///Callback function for password change
+        	$result = $this->users_model->checkPwd($str);
+                if (!$result)
+                {
+                        $this->form_validation->set_message('checkPwd', 'Wrong old password!');
+                        return FALSE;
+                }
+                else
+                {
+                        return TRUE;
+                }
+        }
 
 		public function logLecturerIn()
 		{
@@ -203,6 +240,41 @@
 			}
 		}
 
+		public function dashboard()
+		{
+			if(!$this->session->userdata('lecturer_in'))
+	 		redirect('home');
+			$data['title'] = "Dashboard";
+			
+			$courses = $this->users_model->get_timetable();
+			foreach ($courses as $course) {
+				if ($course['course_code'] == $this->session->userdata('course_code')) {
+					$course_id = $course['id'];
+					
+					$data2 = array(
+					'times_held' => $course['times_held'],
+					'information' => $course['information'],
+					'date_lastheld' => $course['date_lastheld']
+					);
+				}
+			}
+			$data['details'] = $this->users_model->course_atlog($course_id);
+			$data{'students'} = $this->users_model->get_students();
+
+			$this->load->view('templates/header', $data);
+			$this->load->view('users/dashboard', $data2);
+			$this->load->view('templates/footer');
+		}
+
+		public function updateInfo()
+		{
+			$info = $this->input->post('info');
+			$infos = $this->users_model->updateInfo($info);
+			if ($infos) {
+				redirect('users/dashboard');
+			}
+		}
+
 		public function course_check($str)
         {///Callback function for lecturer registration
                 if ($str == 'Select-Course')
@@ -225,6 +297,17 @@
 				$venue = $_POST['venue'][$count];
 
 			$this->users_model->create_courses($code, $title, $date, $venue);
+			}
+		}
+
+		public function editCourse()
+		{
+			$courseId = $this->uri->segment(3);
+			$result = $this->users_model->editCourse($courseId);
+			if ($result) {
+				//Set message
+				$this->session->set_flashdata('editSuccess', 'Successfully edited!!');
+				redirect('users/timetable');
 			}
 		}
 

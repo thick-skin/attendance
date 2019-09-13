@@ -20,7 +20,7 @@
     		<span class="glyphicon glyphicon-menu-hamburger" style="color: rgb(100,200,200);"></span>
     	</button>
       <a class="navbar-brand" style="font-size: 30px; font-family: 'Kranky'; font-weight: bold; color: rgb(200,150,50); margin-left: 2vh;" href="#">At-Log</a>
-      <h4 class="navbar-text"><?= $title ?><?php echo date("d-m-y"); ?></h4>
+      <h4 class="navbar-text"><?= $title ?> What are the constructs of the lang you used??</h4>
     </div>
    <div class="collapse navbar-collapse" id="myNavbar" style="border: none;">
     <ul class="nav navbar-nav navbar-right">
@@ -28,15 +28,16 @@
         <a id="partition" href="<?php echo base_url(); ?>" title="Home"><strong id="shadow"><span class="glyphicon glyphicon-home"></span></strong></a>
       </li>
       <li>
-        <a id="partition" href="<?php echo base_url(); ?>users/timetable" title="Timetable"><strong id="shadow"><span class="glyphicon glyphicon-check" title="Search"></span></strong></a>
+        <a id="partition" href="<?php echo base_url(); ?>users/timetable" title="Timetable"><strong id="shadow"><span class="glyphicon glyphicon-check"></span></strong></a>
       </li>
       <li class="dropdown">
         <a id="partition" class="dropdown-toggle" data-toggle="dropdown" href="#" title="User"><strong id="shadow"><span class="glyphicon glyphicon-user"></span></strong></a>
         <div class="dropdown-menu" style="width: 250px;">
           <ul class="form" style="border: none; padding: 10px 20px;">
         	<?php if ($this->session->userdata('lecturer_in')): ?>
-        		Logged in as <?php echo $this->session->userdata('lecturer_name'); ?><br>
-        		<a id="shadow" href="<?php echo base_url(); ?>users/logout">Logout</a>
+        		<p><b>Logged in as <?php echo $this->session->userdata('lecturer_name'); ?></b></p>
+        		<p><a id="shadow" class="changePwd" href="<?php echo base_url(); ?>users/changePwd" data="<?php echo $this->session->userdata('lecturer_id'); ?>">Change password</a></p>
+        		<p><a id="shadow" href="<?php echo base_url(); ?>users/logout">Logout</a></p>
         		<?php elseif ($this->session->userdata('log_in')): ?>
         			Logged in as Admin<br>
         		<a id="shadow" href="<?php echo base_url(); ?>users/logout">Logout</a>
@@ -64,14 +65,20 @@
         <a id="partition" class="dropdown-toggle" data-toggle="dropdown" href="#" title="Options"><strong id="shadow""><span class="glyphicon glyphicon-list"></span></strong></a>
           <ul class="dropdown-menu" style="">
       <li><a id="shadow" href="#" id="guide" data-toggle="modal" data-target="#myGuide">User Guidelines</a></li>
+      <?php if ($this->session->userdata('lecturer_in')): ?>
       <?php if ($this->session->userdata('otp_set')): ?>
-      <li><a id="shadow" href="<?php echo base_url(); ?>attendance/endAttendance">End attendance</a></li>
+      <li><a id="shadow" class="end" href="<?php echo base_url(); ?>attendance/endAttendance">End attendance</a></li>
       	<?php else: ?>
-      <li><a id="shadow" href="<?php echo base_url(); ?>attendance/startAttendance">Start attendance</a></li>
+      <li><a id="shadow" class="start" href="<?php echo base_url(); ?>attendance/startAttendance">Start attendance</a></li>
       <?php endif; ?>
+      <li><a id="shadow" href="<?php echo base_url(); ?>users/dashboard" title="Info, Students present in last class, etc...">Dashboard</a></li>
+      <?php endif; ?>
+      <?php if ($this->session->userdata('log_in')): ?>
       <li><a id="shadow" href="<?php echo base_url(); ?>users/students">Students</a></li>
       <li><a id="shadow" href="<?php echo base_url(); ?>users/addcourses">Upload courses</a></li>
       <li><a id="shadow" href="<?php echo base_url(); ?>users/register">User registration</a></li>
+      <li><a id="restart" style="color: red;" href="<?php echo base_url(); ?>users/restart">Restart</a></li>
+      <?php endif; ?>
       <li><a id="shadow" href="<?php echo base_url(); ?>about">About</a></li>
     </ul>
       </li>
@@ -85,8 +92,10 @@
   <div class="modal-dialog" style="z-index: 9999 !important;">
 
     <div class="modal-content">
+    	<div class="modal-header">
+      	<button style="color: red;" type="button" class="close" data-dismiss="modal">&times;</button>
+    	</div>
       <div class="modal-body">
-      <button style="color: red;" type="button" class="close" data-dismiss="modal">&times;</button>
       <h3>User Guidlines</h3>
       <ul class="nav nav-tabs nav-tabs-justified">
 	    <li class="active"><a data-toggle="tab" href="#lecturer">Lecturer</a></li>
@@ -98,7 +107,7 @@
 	      <p>2. If the system logs you out, log back in and end attendance else the course will display as ongoing in the timetable.</p>
 	  	</div>
 	  	<div id="admin" class="tab-pane fade">
-	      <p>1. Never forget to logout.</p>
+	      <p>1. Never forget to logout!</p>
 	    </div>
 	  </div>
       </div>

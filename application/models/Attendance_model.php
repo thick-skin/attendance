@@ -3,16 +3,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Attendance_model extends CI_Model {
 
 
-	public function takeAttendance($otp, $ongoing, $course_code)
+	public function takeAttendance($otp, $ongoing, $course_code, $datecheck, $date)
 	{
 		$data = array(
 				'otp' => $otp,
-				'ongoing' => $ongoing 
+				'ongoing' => $ongoing
 			);
 
             $this->db->where('course_code', $course_code);
-            if ($ongoing == 1) {
+  #this makes sure that the times_held column is updated only when the attendance is started and not ended and also makes sure that the column is only updated once in a day
+            if ($ongoing == 1 && $datecheck != $date) {
                 $this->db->set('times_held', 'times_held + 1', FALSE);
+                $this->db->set('date_lastheld', $date);
             }
 			return $this->db->update('courses', $data);
 	}

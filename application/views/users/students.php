@@ -64,7 +64,7 @@
       var value = $(this).attr('data');
       var regno = $(this).attr('data2');
       //alert(value);
-      $("div#atlog").html('<i class="fa fa-circle-o-notch fa-spin" style="color:silver; font-size:50px;"></i>');
+      $("div#atlog").html('<h3>LOADING...</h3>');
       $('div#atlog').load('<?php echo base_url(); ?>users/atlog/'+value+'/'+regno+'', {
         value: value,
         regno: regno

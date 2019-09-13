@@ -55,7 +55,7 @@
     <div class="form-group row">
       <div id="err" class="col-xs-6">
         <small id="Password" style="color:green;"></small>
-        <input class="class form-control" type="text" name="password" id="password" placeholder="Password">
+        <input class="class form-control" type="text" name="pword" id="pword" placeholder="Password">
       </div>
       <div id="err" class="col-xs-6">
         <small id="ConfirmPassword" style="color:green;"></small>

@@ -16,7 +16,7 @@
       <?php foreach ($atlogs as $atlog): ?>
         <?php foreach ($courses as $course): ?>
           <?php if ($atlog['course_id'] == $course['id']): 
-            $perc = ($atlog['times_attended']/$course['times_held'])*100;
+            $perc = round(($atlog['times_attended']/$course['times_held'])*100);
             ?>
             <tr>
               <td><?php echo $course['course_code']; ?></td>

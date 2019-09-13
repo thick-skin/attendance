@@ -24,30 +24,60 @@ Class Attendance extends CI_Controller {
 
 	public function startAttendance()
 	{// To create OTP and start session for attendance
+	#START LOCATION(add the variables to the model function)///////
+		// $data['status'] = false;
+
+		// $latitude = $this->input->get('latitude');
+		// $longitude = $this->input->get('longitude');
+	#END/////
 		$course_code = $this->session->userdata('course_code');
 		$otp = rand(345678,765432);
 		$ongoing = 1;
-			// save otp in database
-		$this->attendance_model->takeAttendance($otp, $ongoing, $course_code);
+		$date =  date("d.m.y");
 
+		$checkdate = $this->users_model->check_ongoing($course_code);
+		if ($checkdate) {
+			foreach ($checkdate as $check) {
+				$datecheck = $check['date_lastheld'];
+			}
+		}
+			// save otp in database
+		$result = $this->attendance_model->takeAttendance($otp, $ongoing, $course_code, $datecheck, $date);
+
+		if ($result) {
 		$att = array(
 			'otp_set' => TRUE
 		);
 		$this->session->set_userdata($att);
 
 		redirect('users/timetable');
+		//		$data['status'] = true;
+			}
+	//	echo json_encode($data);
 	}
 
 	public function endAttendance()
 	{// TO destroy otp and unset session
+
+	#START LOCATION(add the variables to the model function)///////
+		// $data['status'] = false;
+
+		// $latitude = $this->input->get('latitude');
+		// $longitude = $this->input->get('longitude');
+	#END/////
 		$course_code = $this->session->userdata('course_code');
 		$otp = 0;
 		$ongoing = 0;
+		$date =  date("d.m.y");
 
-		$this->attendance_model->takeAttendance($otp, $ongoing, $course_code);
+		$result = $this->attendance_model->takeAttendance($otp, $ongoing, $course_code, $date);
+		if ($result) {
 		$this->session->unset_userdata('otp_set');
+			//	$data['status'] = true;
+			}
 
 		redirect('users/timetable');
+	//	echo json_encode($data);
 	}
 
 	public function markAttendance()

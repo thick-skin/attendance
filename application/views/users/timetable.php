@@ -1,3 +1,6 @@
+<?php if ($this->session->flashdata('editSuccess')) {
+      echo '<p class="alert alert-success" id="flashdata">'.$this->session->flashdata('editSuccess').'</p>';
+    } ?>
 <div style="text-align: center;">
   <h4>Semester Timetable</h4>
 </div>
@@ -7,7 +10,7 @@
     <thead>
       <tr>
         <th>Ongoing</th>
-        <th>Course(Click to mark attendance)</th>
+        <th>Course</th>
         <th>Lecturer</th>
         <th>Date / Time</th>
         <th>Venue</th>
@@ -21,20 +24,25 @@
           <?php if ($course['ongoing'] != 0): ?>
             <i class="glyphicon glyphicon-bell"></i>
             <p>Yes</p>
-            <?php if ($this->session->userdata('lecturer_in')): ?>
+            <!-- This makes sure that the otp only shows when the lecturer is logged in-->
+            <?php if ($this->session->userdata('lecturer_name') == $course['lecturer_name']): ?>
+              <h4 style="color: black;">OTP: <?php echo $course['otp']; ?></h4>
               <h6 id="noInClass" style="color: black;">Present: <b id="noInClass">0</b></h6>
             <?php endif; ?>
           <?php endif ?>
         </td>
         <td>
         <!-- add a disable class to course links that are not ongoing at the moment -->
-          <a href="#" class="btn btn-block <?php if(!$this->session->userdata('lecturer_in') || $course['ongoing'] == 0){echo "disabled";} ?>" id="log" data-toggle="modal" data-target="#myLog" data1="<?php echo $course['id']; ?>">
-          <?php echo $course['course_code']; ?>
-          <p><small><?php echo $course['course_title']; ?></small></p>
+          <a href="#" class="btn btn-block <?php if($this->session->userdata('lecturer_name') != $course['lecturer_name'] || !$this->session->userdata('otp_set')){echo "disabled";} ?>" id="log" data-toggle="modal" data-target="#myLog" data1="<?php echo $course['id']; ?>">
+          <?php echo $course['course_title']; ?>
+          <p><small><?php echo $course['course_code']; ?></small></p>
         </a>
+        <?php if ($this->session->userdata('log_in')): ?>
+          <a href="<?php echo base_url(); ?>users/editCourse/<?php echo $course['id']; ?>" id="edit-courses" title="Edit date/venue" data="<?php echo $course['course_code']; ?>" data1="<?php echo $course['date_time']; ?>" data2="<?php echo $course['venue']; ?>"><i class="text-info glyphicon glyphicon-edit"></i></a>
+        <?php endif; ?>
         </td>
         <td><p><?php echo $course['lecturer_name']; ?></p></td>
-        <td><p><?php echo $course['date_time']; ?></p><p>Thursdays / 2:00pm</p></td>
+        <td><p><?php echo $course['date_time']; ?></p></td>
         <td><p><?php echo $course['venue']; ?></p></td>
         <td class="text-danger"><p><?php echo $course['information']; ?></p></td>
       </tr>
@@ -47,8 +55,10 @@
   <div class="modal-dialog" style="top: 30vh; z-index: 9999 !important;">
 
     <div class="modal-content">
-      <div class="modal-body">
+      <div class="modal-header">
       <button style="color: red;" type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
       <div id="the-message"></div>
       <?php echo form_open('attendance/markAttendance', array("id" => "markAttendance")); ?>
           <div id="attErr" class="form-group">
@@ -140,5 +150,77 @@ $("#markAttendance").submit(function(e) {
         });
       });
 /////////////////////MARK ATTENDANCE ENDS HERE////////////////////////////
+
+//////////////EDIT DATE TIME BEINS HERE/////////////////////
+function updateCourse() {
+  $("#editCourse").submit(function (e) {
+    
+    $("form#editCourse input").css('border-color', 'silver');
+          
+          $("form#editCourse input").each(function () {
+            if($(this).val() == ''){
+              e.preventDefault();
+              $(this).css('border-color', '#cc0000');
+            }
+          }); 
+              
+      });
+}
+
+$('div.table-responsive').on('click', 'a#edit-courses', function (ev) {
+      ev.preventDefault();
+      var url = $(this).attr('href');
+      var course_code = $(this).attr('data');
+      var date = $(this).attr('data1');
+      var venue = $(this).attr('data2');
+
+      var head = '';
+        head += '<div>'+
+                '<h3>'+course_code+'</h3>'+
+                '<form id="editCourse" action="'+url+'" method="POST">'+
+                '<div id="editErr" class="form-group">'+
+                '<input type="text" class="form-control" name="date" id="date" value="'+date+'">'+
+                '</div>'+
+                '<div id="editErr" class="form-group">'+
+                '<input type="text" class="form-control" name="venue" id="venue" value="'+venue+'">'+
+                '</div>'+
+                '<button type="submit" class="btn btn-primary">Update</button>'+
+                '</form>'+
+                '</div>';
+      $("#myLog").modal('show');
+      $("#myLog").find('.modal-body').html(head); 
+
+      updateCourse();     
+      // $.ajax({
+      //   type: 'ajax',
+      //   method: 'get',
+      //   url: '<?php //echo base_url(); ?>vote/voteDetails',
+      //   data: {candidate: candidate},
+      //   async: false,
+      //   dataType: 'json',
+      //   success: function(data){
+      //     var html =  '<table id="deptVotes" class="table table-bordered table-responsive">'+
+      //                 '<tr>'+
+      //                 '<th>Department</th>'+
+      //                 '<th>No. of votes</th>'+
+      //                 '</tr>';
+      //       var i;
+      //       for (i = 0; i < data.length; i++) {
+      //     html += '<tr>'+
+      //             '<td>'+data[i].dept+'</td>'+
+      //             '<td>'+data[i].total+'</td>'+
+      //             '</tr>';
+      //       }
+      //       html += '</table>';
+
+      // $("#voteDetails").find('.modal-body').html(html);
+      //   },
+      //   error: function () {
+      //     alert('Could not get details');
+      //   }
+      // });
+
+    });
+///////////////EDIT ENDS HERE///////////////////////////////
   });
 </script>
